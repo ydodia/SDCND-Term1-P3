@@ -1,118 +1,40 @@
-# Behaviorial Cloning Project
+# Behavioral Cloning - P3
 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+###Overview
+This aim of this project was to use a gain experience and practice with behavioral cloning. I used the provided simulator to drive a car around track 1 and collected data based on my driving ability using the mouse to control steering angle and the keyboard to control acceleration and braking. I then constructed a model based on NVIDIA's and used it for training and validation. Using this model, the simulator's car drove around track 1 successfully for two laps without once touching the lane boundaries (yellow lane lines).
 
-Overview
----
-This repository contains starting files for the Behavioral Cloning Project.
+### Model Architecture and Strategy
+The `model.py` file contains my code for training, validating and saving the convolutional neural network. The model used was directly from NVIDIA (lines 82-91) as referenced in the lecture video. The model architecture is:
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
+1. Crop the image by cutting off the top 70 pixels and bottom 20pixels; nothing is cropped from the left or right sides. (line 79)
+2. Normalization by using a Keras Lambda layer. (line 80)
 
-We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
+3. Convolutional layer with a depth, filter size and stride window of 24, (5x5) and (2,2), with ReLU activation.
+4. Convolutional layer with a 32, (5,5) and (2,2) stride, with ReLU activation.
+5. Convolutional layer with a 48, (5,5) and (2,2) stride, with ReLU activation.
+6. Convolutional layer with a 64, (3,3) and default stride, with ReLU activation.
+7. Additional convolutional layer with a 64, (3,3) and default stride, with ReLU activation.
+8. Flatten everything to 1-D.
+9. Fully-connected layer of size 100.
+10. Fully-connected layer of size 50.
+11. Fully-connected layer of size 10.
+12. Fully-connected layer of size 1.
 
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
+I didn't experience any indication of overfitting and thus didn't make any model modifications in this respect. My data sizes were X data points in total. I did a data split and used X for training and Y for validation, representing a 80/20 split. Additionally, I implemented data augmentation steps by using the left, right and mirrored center images for a total of 4 images or data points per capture line. Finally, I used an angle correction method to compensate for the left and right cameras.
+The model uses Mean Squared Error (MSE) as the loss metric and the Adam optimizer with default learning rate (0.001).
 
-To meet specifications, the project will require submitting five files: 
-* model.py (script used to create and train the model)
-* drive.py (script to drive the car - feel free to modify this file)
-* model.h5 (a trained Keras model)
-* a report writeup file (either markdown or pdf)
-* video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
+The figure below helps visual NVIDIA's model as used in my project.
 
-This README file describes how to output the video in the "Details About Files In This Directory" section.
+[arch]: ./NVIDIA_arch.png
+![NVIDIA End-to-End Deep Learning for Self Driving Cars][arch]
 
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+### Data Capturing
+I used the mouse for steering and the keyboard for acceleration and braking. I drove 2 laps clockwise (CW) and 1 lap counter-clockwise while trying to stay as close to the center of the track as possible. I then captured data for critical turns at three points (ordered CW): the first left turn with water on the right; the left turn with the dirt road opening on the right; and lastly, on the right turn with water on the left side. For each of these segments I captured a handful (3-4) of segments of the car starting close to the edge of the track and then steering hard to get back to the center. This resulted in smoothly re-centering to center of the track if the car failed to turn hard into the turn and risked getting run off-track. Total data size was 17,248, representing a capture each for the left, center and right cameras with corresponding steering angle taken from the center camera.
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+### Model Parameter Tuning
+For the data, I tuned the angle correction value through trial and error via running the autonomous driving mode. I settled on a value of 0.11 since higher values (greater than 0.2) exhibited greater steering angle oscillations between positive and negative values.
+For the NVIDIA model architecture, I settled on a `batch size of 32` and number of `epochs to 10`. I settled on a smaller batch size to allow for quicker computation in training. I increased the number of epochs from 8 to 10 to allow for a little better training, as measured by MSE which still seemed to decreased.
+The model also a
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
-The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior 
-* Design, train and validate a model that predicts a steering angle from image data
-* Use the model to drive the vehicle autonomously around the first track in the simulator. The vehicle should remain on the road for an entire loop around the track.
-* Summarize the results with a written report
-
-### Dependencies
-This lab requires:
-
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
-
-The lab enviroment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
-
-The following resources can be found in this github repository:
-* drive.py
-* video.py
-* writeup_template.md
-
-The simulator can be downloaded from the classroom. In the classroom, we have also provided sample data that you can optionally use to help train your model.
-
-## Details About Files In This Directory
-
-### `drive.py`
-
-Usage of `drive.py` requires you have saved the trained model as an h5 file, i.e. `model.h5`. See the [Keras documentation](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model) for how to create this file using the following command:
-```sh
-model.save(filepath)
-```
-
-Once the model has been saved, it can be used with drive.py using this command:
-
-```sh
-python drive.py model.h5
-```
-
-The above command will load the trained model and use the model to make predictions on individual images in real-time and send the predicted angle back to the server via a websocket connection.
-
-Note: There is known local system's setting issue with replacing "," with "." when using drive.py. When this happens it can make predicted steering values clipped to max/min values. If this occurs, a known fix for this is to add "export LANG=en_US.utf8" to the bashrc file.
-
-#### Saving a video of the autonomous agent
-
-```sh
-python drive.py model.h5 run1
-```
-
-The fourth argument, `run1`, is the directory in which to save the images seen by the agent. If the directory already exists, it'll be overwritten.
-
-```sh
-ls run1
-
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_528.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_573.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_618.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_697.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_723.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_749.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_817.jpg
-...
-```
-
-The image file name is a timestamp of when the image was seen. This information is used by `video.py` to create a chronological video of the agent driving.
-
-### `video.py`
-
-```sh
-python video.py run1
-```
-
-Creates a video based on images found in the `run1` directory. The name of the video will be the name of the directory followed by `'.mp4'`, so, in this case the video will be `run1.mp4`.
-
-Optionally, one can specify the FPS (frames per second) of the video:
-
-```sh
-python video.py run1 --fps 48
-```
-
-Will run the video at 48 FPS. The default FPS is 60.
-
-#### Why create a video
-
-1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
-2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
+### Results
+My model's MSE results were `0.0056` after the 10th run. The true test was running the simulator on autonomous mode where the car drove 2 laps flawlessly, without touching any of the side, yellow lane lines. I decided to test it further and managed to get 6+ laps on the next run.

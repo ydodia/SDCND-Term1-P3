@@ -28,6 +28,10 @@ with open('./linux_sim/data2/driving_log.csv') as csvfile:
 
 train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
+# my generator function outputs X & y array of size batch_size
+# since I use data augmentation, the batch_size is divided by four;
+# i.e. for each line, there are 2 additional camera images (L & R),
+# as well as the mirrored image, for a total of 4.
 def my_generator(samples, batch_size=128):
     n_samples = len(samples)
     current_path = './linux_sim/data2/IMG/'
@@ -57,6 +61,12 @@ def my_generator(samples, batch_size=128):
 
 
 # build Keras model
+# I crop the image, removing the top 70 px and bottom 25 px then normalize.
+# The model used is the one from NVIDIA, consisting of:
+#   2D-Convolutional layers for first five layers;
+#   Flatten layer;
+#   Three fully connected layers of decreasing sizes;
+#   Finally, a fully-connected layer output the single value for drive angle.
 w = 320
 h = 160
 batch_size = 32
