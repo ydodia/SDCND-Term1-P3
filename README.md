@@ -1,6 +1,6 @@
 # Behavioral Cloning - P3
 
-###Overview
+### Overview
 This aim of this project was to use a gain experience and practice with behavioral cloning. I used the provided simulator to drive a car around track 1 and collected data based on my driving ability using the mouse to control steering angle and the keyboard to control acceleration and braking. I then constructed a model based on NVIDIA's and used it for training and validation. Using this model, the simulator's car drove around track 1 successfully for two laps without once touching the lane boundaries (yellow lane lines).
 
 ### Model Architecture and Strategy
