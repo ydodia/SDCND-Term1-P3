@@ -4,7 +4,11 @@
 This aim of this project was to use a gain experience and practice with behavioral cloning. I used the provided simulator to drive a car around track 1 and collected data based on my driving ability using the mouse to control steering angle and the keyboard to control acceleration and braking. I then constructed a model based on NVIDIA's and used it for training and validation. Using this model, the simulator's car drove around track 1 successfully for two laps without once touching the lane boundaries (yellow lane lines).
 
 ### Model Architecture and Strategy
-The `model.py` file contains my code for training, validating and saving the convolutional neural network. The model used was directly from NVIDIA (lines 82-91) as referenced in the lecture video. The model architecture is:
+The `model.py` file contains my code for training, validating and saving the convolutional neural network. I initially started with a LeNet-5 style model but that seemed to require extra work around the tighter turns and I would often get stuck on a curb or veer off-road.
+
+After much trial and error with the initial model, I started experimenting with NVIDIA's end-to-end model (lines 82-91) as referenced in the lecture video. This model showed marked improvement and I decided to use it for my final model.
+
+The NVIDIA end-to-end model architecture is:
 
 1. Crop the image by cutting off the top 70 pixels and bottom 20pixels; nothing is cropped from the left or right sides. (line 79)
 2. Normalization by using a Keras Lambda layer. (line 80)
@@ -30,6 +34,20 @@ The figure below helps visual NVIDIA's model as used in my project.
 
 ### Data Capturing
 I used the mouse for steering and the keyboard for acceleration and braking. I drove 2 laps clockwise (CW) and 1 lap counter-clockwise while trying to stay as close to the center of the track as possible. I then captured data for critical turns at three points (ordered CW): the first left turn with water on the right; the left turn with the dirt road opening on the right; and lastly, on the right turn with water on the left side. For each of these segments I captured a handful (3-4) of segments of the car starting close to the edge of the track and then steering hard to get back to the center. This resulted in smoothly re-centering to center of the track if the car failed to turn hard into the turn and risked getting run off-track. Total data size was 17,248, representing a capture each for the left, center and right cameras with corresponding steering angle taken from the center camera.
+
+### Training Data Characteristics
+The data input into the model is initially cropped prior to normalization, removing 70 pixels from the top and 25 pixels from the bottom; nothing was removed from the sides. To illustrate, the below images depict 2 pairs of original and cropped images.
+
+[img1]: ./camera1.png
+![Original, cropped 1][img1]
+
+[img2]: ./camera2.png
+![Original, cropped 2][img2]
+
+Another aspect of further study to help improve the model, would be to further take advantage of the steering angle distribution. As quick study, the distribution of steering angle values is depicted in a histogram below.
+
+[histo]: ./histo.png
+![Distribution of steering angles.][histo]
 
 ### Model Parameter Tuning
 For the data, I tuned the angle correction value through trial and error via running the autonomous driving mode. I settled on a value of 0.11 since higher values (greater than 0.2) exhibited greater steering angle oscillations between positive and negative values.
